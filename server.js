@@ -29,16 +29,19 @@ app.use(express.static(__dirname + '/public'));
 
     // Create web sockets connection.
     io.sockets.on('connection', function (socket) {
-
+        console.log('connected');
         socket.on("start stores", function() {
-            client.get(params, function(err, res, body) {
-                body.wsResponse.result.forEach(function(){
-                    var outputPoint = {"lng": this.longitude_google,"lat": this.latitude_google};
-                    console.log('outputPoint:', outputPoint); // Print the HTML for the Google homepage.
-                    // socket.broadcast.emit("store", outputPoint);
-                // return console.log(body.rows[0].title);
+            console.log('send stuff');
+                client.get(params, function(err, res, body) {
+                    JSON.parse(body.substring(1)).wsResponse.result.forEach(function(item){
+                        var outputPoint = {"lng": item.longitude_google,"lat": item.latitude_google};
+                        //console.log('outputPoint:', outputPoint); // Print the HTML for the Google homepage.
+                        socket.broadcast.emit("store", outputPoint);
+                        // return console.log(body.rows[0].title);
+                    });
                 });
-            });
+
+
         });
 
         // Emits signal to the client telling them that the
