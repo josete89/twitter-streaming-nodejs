@@ -4,8 +4,12 @@ var twitter = require('twitter'),
     app = express(),
     http = require('http'),
     server = http.createServer(app),
-    io = require('socket.io').listen(server);
-    url = 'http://placesws.adidas-group.com/API/search?brand=adidas&geoengine=google&method=get&category=store&latlng=33.791056165773554,-118.33751519475203,20000&page=2&pagesize=500&fields=name,street1,street2,addressline,buildingname,postal_code,city,state,store_owner,country,storetype,longitude_google,latitude_google,store_owner,state,performance,brand_store,factory_outlet,originals,neo_label,y3,slvr,children,woman,footwear,football,basketball,outdoor,porsche_design,miadidas,miteam,stella_mccartney,eyewear,micoach,opening_ceremony&format=json&storetype='
+    io = require('socket.io').listen(server),
+    params = 'API/search?brand=adidas&geoengine=google&method=get&category=store&latlng=33.791056165773554,-118.33751519475203,20000&page=2&pagesize=500&fields=name,street1,street2,addressline,buildingname,postal_code,city,state,store_owner,country,storetype,longitude_google,latitude_google,store_owner,state,performance,brand_store,factory_outlet,originals,neo_label,y3,slvr,children,woman,footwear,football,basketball,outdoor,porsche_design,miadidas,miteam,stella_mccartney,eyewear,micoach,opening_ceremony&format=json&storetype=',
+    url = 'http://placesws.adidas-group.com/',
+    request = require('request-json'),
+    client = request.createClient(url);
+
 
 //Setup twitter stream api
 var twit = new twitter({
@@ -22,48 +26,19 @@ server.listen(process.env.PORT || 8081);
 //Setup rotuing for app
 app.use(express.static(__dirname + '/public'));
 
-function madeRequest(callback){
-    var options = {
-        host: 'placesws.adidas-group.com',
-        path: '/API/search?brand=adidas&geoengine=google&method=get&category=store&latlng=33.791056165773554,-118.33751519475203,20000&page=2&pagesize=500&fields=name,street1,street2,addressline,buildingname,postal_code,city,state,store_owner,country,storetype,longitude_google,latitude_google,store_owner,state,performance,brand_store,factory_outlet,originals,neo_label,y3,slvr,children,woman,footwear,football,basketball,outdoor,porsche_design,miadidas,miteam,stella_mccartney,eyewear,micoach,opening_ceremony&format=json&storetype=',
-        method:"GET"
-
-    };
-
-    var httpCallback = function(response) {
-        var str = ''
-        response.on('data', function (chunk) {
-            str += chunk;
-            console.log('chunk')
-        });
-
-        response.on('end', function () {
-            console.log('end'+str);
-            callback(str)
-        });
-    }
-
-     http.request(options, httpCallback)
-}
-
-madeRequest(function(jsonRes){
-    var response = JSON.parse(jsonRes);
-    response.wsResponse.result.forEach(function(){
-        var outputPoint = {"lng": this.longitude_google,"lat": this.latitude_google};
-        console.log('outputPoint:', outputPoint); // Print the HTML for the Google homepage.
-        // socket.broadcast.emit("store", outputPoint);
-
-    });
-})
-
 
     // Create web sockets connection.
     io.sockets.on('connection', function (socket) {
 
         socket.on("start stores", function() {
-
-
-
+            client.get(params, function(err, res, body) {
+                body.wsResponse.result.forEach(function(){
+                    var outputPoint = {"lng": this.longitude_google,"lat": this.latitude_google};
+                    console.log('outputPoint:', outputPoint); // Print the HTML for the Google homepage.
+                    // socket.broadcast.emit("store", outputPoint);
+                // return console.log(body.rows[0].title);
+                });
+            });
         });
 
         // Emits signal to the client telling them that the
