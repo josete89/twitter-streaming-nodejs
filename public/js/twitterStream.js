@@ -30,8 +30,9 @@ function initialize() {
 
     // This listens on the "twitter-steam" channel and data is 
     // received everytime a new tweet is receieved.
-    socket.on('twitter-stream', function (data) {
+    socket.on('store', function (data) {
 
+      console.log('data received', data);
       //Add tweet to the heat map array.
       var tweetLocation = new google.maps.LatLng(data.lng,data.lat);
       liveTweets.push(tweetLocation);
@@ -55,7 +56,7 @@ function initialize() {
 
       //Now that we are connected to the server let's tell 
       //the server we are ready to start receiving tweets.
-      socket.emit("start tweets");
+      socket.emit("start stores");
     });
   }
 }
