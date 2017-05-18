@@ -5,7 +5,7 @@ var twitter = require('twitter'),
     http = require('http'),
     server = http.createServer(app),
     io = require('socket.io').listen(server),
-    params = 'API/search?brand=adidas&geoengine=google&method=get&category=store&latlng=33.791056165773554,-118.33751519475203,20000&page=2&pagesize=500&fields=name,street1,street2,addressline,buildingname,postal_code,city,state,store_owner,country,storetype,longitude_google,latitude_google,store_owner,state,performance,brand_store,factory_outlet,originals,neo_label,y3,slvr,children,woman,footwear,football,basketball,outdoor,porsche_design,miadidas,miteam,stella_mccartney,eyewear,micoach,opening_ceremony&format=json&storetype=',
+    params = 'API/search?brand=adidas&geoengine=google&method=get&category=store&latlng=33.791056165773554,-118.33751519475203,600371&page=2&pagesize=500&fields=name,street1,street2,addressline,buildingname,postal_code,city,state,store_owner,country,storetype,longitude_google,latitude_google,store_owner,state,performance,brand_store,factory_outlet,originals,neo_label,y3,slvr,children,woman,footwear,football,basketball,outdoor,porsche_design,miadidas,miteam,stella_mccartney,eyewear,micoach,opening_ceremony&format=json&storetype=',
     url = 'http://placesws.adidas-group.com/',
     request = require('request-json'),
     client = request.createClient(url);
@@ -32,14 +32,18 @@ app.use(express.static(__dirname + '/public'));
         console.log('connected');
         socket.on("start stores", function() {
             console.log('send stuff');
-                client.get(params, function(err, res, body) {
-                    JSON.parse(body.substring(1)).wsResponse.result.forEach(function(item){
-                        var outputPoint = {"lng": item.longitude_google,"lat": item.latitude_google};
-                        //console.log('outputPoint:', outputPoint); // Print the HTML for the Google homepage.
-                        socket.broadcast.emit("store", outputPoint);
-                        // return console.log(body.rows[0].title);
-                    });
+
+            client.get(params, function(err, res, body) {
+                JSON.parse(body.substring(1)).wsResponse.result.forEach(function(item){
+                    var outputPoint = {"lat": item.longitude_google,"lng": item.latitude_google};
+                    console.log('outputPoint:', outputPoint); // Print the HTML for the Google homepage.
+                    socket.emit("store", outputPoint);
+                    // return console.log(body.rows[0].title);
                 });
+            });
+
+
+
 
 
         });
