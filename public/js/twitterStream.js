@@ -57,10 +57,10 @@ function initialize() {
       //Now that we are connected to the server let's tell 
       //the server we are ready to start receiving tweets.
 
-      setTimeout(function(){
+      // setTimeout(function(){
         console.log("requesting stores");
         socket.emit("start stores");
-      },3000);
+      // },3000);
 
     });
   }
